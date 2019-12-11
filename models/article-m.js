@@ -48,7 +48,7 @@ const updateArticleById = (inc_votes, article_id) => {
     if(inc_votes === undefined){
         return Promise.reject({
             status:400,
-             msg: 'nothing to patch'
+             msg: 'Post violates non null constraints'
         })
     } else {
 
@@ -68,9 +68,31 @@ const updateArticleById = (inc_votes, article_id) => {
     })
   }
 }
+
+const insertComment = (body, username, article_id, invalid) => {
+    if(body === undefined || username === undefined){
+        return Promise.reject({
+            status:400,
+             msg: 'Post violates non null constraints'
+        })
+    }
+    if (Object.keys(invalid).length != 0) {
+		return Promise.reject({ status: 400, msg: 'Column does not exist' });
+	} else {
+return connection
+.into('comment')
+.insert({'article_id': article_id, 'body': body,  'author': username})
+.returning('body')
+.then(comment => {
+    //console.log(body)
+    return comment[0]  // how shoud I return this
+})
+
+}
+}
         
 
 
 
 
-module.exports = {fetchArticleById, updateArticleById};
+module.exports = {fetchArticleById, updateArticleById, insertComment};
