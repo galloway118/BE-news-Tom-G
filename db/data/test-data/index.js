@@ -1,4 +1,4 @@
-exports.topicsData = require('./topics');
-exports.articlesData = require('./articles');
-exports.commentsData = require('./comments');
-exports.usersData = require('./users');
+exports.topicData = require('./topics');
+exports.articleData = require('./articles');
+exports.commentData = require('./comments');
+exports.userData = require('./users');

@@ -60,7 +60,7 @@ describe('formatComments', () => {
   });
   it('Takes array with one Obj, returns updated array with new key in Obj', () => {
 		const articleRef = {
-			'icellusedkars': 1
+			'Living in the shadow of a great man': 1
 		};
 		const comments = [
 			{
@@ -75,7 +75,7 @@ describe('formatComments', () => {
     const expectedResult = [
 			{
         body: 'I hate streaming noses',
-        article_id: 'Living in the shadow of a great man',
+        article_id: 1,
         author: 'icellusedkars',
         votes: 0,
         created_at: new Date(1385210163389),
@@ -85,7 +85,7 @@ describe('formatComments', () => {
   });
   it('Takes array with one Obj, returns updated array with new key in Obj', () => {
 		const articleRef = {
-			'icellusedkars': 1
+			'Living in the shadow of a great man': 1, 'Living biscuits': 2
 		};
 		const comments = [
 			{
@@ -107,14 +107,14 @@ describe('formatComments', () => {
     const expectedResult = [
 			{
         body: 'I hate streaming noses',
-        article_id: 'Living in the shadow of a great man',
+        article_id: 1,
         author: 'icellusedkars',
         votes: 0,
         created_at: new Date(1385210163389),
       },
       {
         body: 'biscuits',
-        article_id: 'Living biscuits',
+        article_id: 2,
         author: 'myBiscuits',
         votes: 1,
         created_at: new Date(1385410163389),

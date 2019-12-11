@@ -52,8 +52,12 @@ exports.getCommentsByArticleId = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-    fetchArticles()
-    .then(() => {
-
+ const {sort_by, order, author, topic, ...invalidColumn } = req.query;
+    fetchArticles(sort_by, order, author, topic, invalidColumn)
+    .then(articles => {
+        res.status(200).send(articles)
     })
-}
+    .catch(err => 
+        next(err))
+};
+   
