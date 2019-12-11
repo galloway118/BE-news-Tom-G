@@ -1,6 +1,26 @@
 const connection = require('../db/client');
 
 const fetchArticleById = (article_id) => {
+
+//     return connection.select('article.*')
+//     .from('article')
+//     .leftJoin('comment', 'article.article_id', '=', 'comment.article_id')
+//     .count({comment_count: 'comment_id'})
+//     .groupBy('article.article_id')
+//     .then(article => {
+//             if(!article.length){
+//                 return Promise.reject({
+//                     status: 404,
+//                     msg: 'article not found'
+//                 })
+//             }
+//             else {
+//             //table[0].comment_count = count[0].count;
+//             console.log({article: article[0]})
+//             return {article: article[0]};
+//             }
+//         })
+// }
     const table = connection('article')
     .select('*')
     .where('article_id', '=', article_id);
@@ -25,18 +45,30 @@ const fetchArticleById = (article_id) => {
 }
 
 const updateArticleById = (inc_votes, article_id) => {
-        
-    const articleObj =  connection('article')
+    if(inc_votes === undefined){
+        return Promise.reject({
+            status:400,
+             msg: 'nothing to patch'
+        })
+    } else {
+
+    return  connection('article')
     .where('article_id', '=', article_id)
-    // .update('votes', votes)
+    .increment('votes', inc_votes)
     .returning('*')
-    return Promise.all([inc_votes, articleObj])
-    .then(([inc_votes, articleObj]) => {
-        articleObj[0].votes = articleObj[0].votes + inc_votes;
-        //console.log({article: articleObj[0]})
-        return {article: articleObj[0]}
+    .then(article => {
+        if(!article.length){
+            return Promise.reject({
+                status:404,
+                 msg: 'article not found'
+            })
+        } else {
+        return {article: article[0]}
+        }
     })
+  }
 }
+        
 
 
 

@@ -86,8 +86,8 @@ describe('/api', () => {
             })
         })
     });
-    describe('/api/articles', () => {
-        describe('/api/articles/:article_id', () => {
+    describe('/api/article', () => {
+        describe('/api/article/:article_id', () => {
         it('GET:200: returns article when given their article_id', () => {
             return request(server)
             .get('/api/article/1')
@@ -126,8 +126,70 @@ describe('/api', () => {
     .expect(200)
     .then(article => {
         expect(article.body.article.votes).to.equal(101)
-    })
         })
+     })
+     it('PATCH: 200 updates the vote column by a negative increment', () => {
+        return request(server)
+        .patch('/api/article/1')
+        .send({inc_votes : -1})
+        .expect(200)
+        .then(article => {
+            expect(article.body.article.votes).to.equal(99)
+            })
+         })
+     it('ERROR - PATCH: 400 when passed invalid id', () => {
+         return request(server)
+         .patch('/api/article/silly')
+         .send({inc_votes : 1})
+         .expect(400)
+         .then(err => {
+             expect(err.body.msg).to.equal('Invalid input type')
+         })
+     })
+     it('ERROR - PATCH 400 when article_id not in the database', () => {
+         return request(server)
+         .patch('/api/article/9999')
+         .send({inc_votes : 1})
+         .expect(404)
+         .then(err => {
+             expect(err.body.msg).to.equal('article not found')
+         })
+     })
+     it('ERROR - PATCH: 400 when passed an empty object', () => {
+         return request(server)
+         .patch('/api/article/1')
+         .send({})
+         .expect(400)
+         .then(err => {
+             expect(err.body.msg).to.equal('nothing to patch')
+         })
+     })
+     it('ERROR - PATCH: 400 when passed an object with an incorrect input value type', () => {
+        return request(server)
+        .patch('/api/article/1')
+        .send({inc_votes: 'peanuts' })
+        .expect(400)
+        .then(err => {
+            expect(err.body.msg).to.equal('Invalid input type')
+        })
+    })
+    describe('/api/article/:article_id/comments', () => {
+        it('Post: 200 ', () => {
+            return request(server)
+            .post()
+            .send()
+            .expect()
+            .then(article => {
+                
+                })
+             })
     });
-    })      
+
+    });
+  })      
 })
+//tests for negative votes
+// test for invalid id
+// test for no body sent 
+// test for invalid body sent 
+// test for valid but no present id 
