@@ -2,47 +2,26 @@ const connection = require('../db/client');
 
 const fetchArticleById = (article_id) => {
 
-//     return connection.select('article.*')
-//     .from('article')
-//     .leftJoin('comment', 'article.article_id', '=', 'comment.article_id')
-//     .count({comment_count: 'comment_id'})
-//     .groupBy('article.article_id')
-//     .then(article => {
-//             if(!article.length){
-//                 return Promise.reject({
-//                     status: 404,
-//                     msg: 'article not found'
-//                 })
-//             }
-//             else {
-//             //table[0].comment_count = count[0].count;
-//             console.log({article: article[0]})
-//             return {article: article[0]};
-//             }
-//         })
-// }
-    const table = connection('article')
-    .select('*')
-    .where('article_id', '=', article_id);
-
-    const count = connection('comment')
-    .count('article_id')
-    .where('article_id', '=', article_id);
-
-    return Promise.all([table, count])
-    .then(([table, count]) => {
-        if(!table.length){
-            return Promise.reject({
-                status: 404,
-                msg: 'article not found'
-            })
-        }
-        else {
-        table[0].comment_count = count[0].count;
-        return {article: table[0]};
-        }
-    })
+    return connection.select('article.*')
+    .from('article')
+    .where('article.article_id', '=', article_id)
+    .leftJoin('comment', 'comment.article_id', '=', 'article.article_id')
+    .count({comment_count: 'comment.article_id'})
+    .groupBy('article.article_id')
+    .then(article => {
+            if(!article.length){
+                return Promise.reject({
+                    status: 404,
+                    msg: 'article not found'
+                })
+            }
+            else {
+            console.log({article: article[0]})
+            return {article: article[0]};
+            }
+        })
 }
+
 
 const updateArticleById = (inc_votes, article_id) => {
     if(inc_votes === undefined){
@@ -98,7 +77,6 @@ const fetchCommentsByArticleId = (article_id, sort_by = 'created_at', order = 'd
     .from('comment')
     .where('article_id', '=', article_id)
     .orderBy(sort_by, order)
-    //.innerJoin('users', 'users.username', 'comment.author')
     .select('comment_id', 'votes', 'created_at', 'author', 'body')
     .then(comment => {
         if(!comment.length){
@@ -113,9 +91,17 @@ const fetchCommentsByArticleId = (article_id, sort_by = 'created_at', order = 'd
 }
 }
 
+const fetchArticles = () => {
+    
+}
+
         
 
 
 
 
-module.exports = {fetchArticleById, updateArticleById, insertComment, fetchCommentsByArticleId};
+module.exports = {
+    fetchArticleById, 
+    updateArticleById, 
+    insertComment, 
+    fetchCommentsByArticleId};
