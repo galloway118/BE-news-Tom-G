@@ -82,17 +82,40 @@ const insertComment = (body, username, article_id, invalid) => {
 return connection
 .into('comment')
 .insert({'article_id': article_id, 'body': body,  'author': username})
-.returning('body')
+.returning('*')
 .then(comment => {
-    //console.log(body)
-    return comment[0]  // how shoud I return this
+    return {comment: comment[0]};  
 })
+}
+}
 
+const fetchCommentsByArticleId = (article_id, sort_by = 'created_at', order = 'desc') => {
+    const validOrders = ['asc', 'desc'];
+    if (!validOrders.includes(order)) {
+		return Promise.reject({ status: 400, msg: 'Invalid order value' });
+	} else {
+    return connection
+    .from('comment')
+    .where('article_id', '=', article_id)
+    .orderBy(sort_by, order)
+    //.innerJoin('users', 'users.username', 'comment.author')
+    .select('comment_id', 'votes', 'created_at', 'author', 'body')
+    .then(comment => {
+        if(!comment.length){
+            return Promise.reject({
+                status:404,
+                 msg: 'comments not found'
+            })
+        } else {
+        return {comments : comment}
+        }
+    })
 }
 }
+
         
 
 
 
 
-module.exports = {fetchArticleById, updateArticleById, insertComment};
+module.exports = {fetchArticleById, updateArticleById, insertComment, fetchCommentsByArticleId};
