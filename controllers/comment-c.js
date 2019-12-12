@@ -1,5 +1,5 @@
 
-const {updateCommentsById} = require('../models/comment-m');
+const {updateCommentsById, removeCommentById} = require('../models/comment-m');
 
 exports.patchCommentsById = (req, res, next) => {
     const {inc_votes} = req.body;
@@ -10,4 +10,13 @@ exports.patchCommentsById = (req, res, next) => {
         res.status(200).send(comments)
     })
     .catch( err => next(err))
+};
+
+exports.deleteComment = (req, res, next) => {
+const {comment_id} = req.params;
+    removeCommentById(comment_id)
+    .then(() => {
+        res.status(204).send({})
+    })
+    .catch(err => next(err))
 };

@@ -129,7 +129,7 @@ describe('/api', () => {
 					expect(treasures.body.msg).to.equal('Column does not exist');
 				});
 		});
-		it('GET: 404 returns error and message when valid query finds no results', () => {
+		it('ERROR - GET: 404 returns error and message when valid query finds no results', () => {
 			return request(server)
 				.get('/api/article?topic=whatareyouthinking')
 				.expect(404)
@@ -137,7 +137,7 @@ describe('/api', () => {
 					expect(err.body.msg).to.equal('No articles found');
 				});
         });
-        it('GET: 400 when query is invalid', () => {
+        it('ERROR - GET: 400 when query is invalid', () => {
 			return request(server)
 				.get('/api/article?sort_by=doooo')
 				.expect(400) //< changed from 404
@@ -145,7 +145,7 @@ describe('/api', () => {
 					expect(err.body.msg).to.equal('Invalid query');
 				});
 		});
-		it('GET: 400 when order is invalid', () => {
+		it('ERROR - GET: 400 when order is invalid', () => {
 			return request(server)
 				.get('/api/article?sort_by=topic&order=yourdoingthiswrong')
 				.expect(400) 
@@ -180,7 +180,7 @@ describe('/api', () => {
             expect(error.body.msg).to.equal('article not found'));
         })
     
-        it('ERROR - GET:400 return message when article id not in database', () => {
+        it('ERROR - GET:400 return message when article id not valid', () => {
             return request(server)
             .get('/api/article/sausages')
             .expect(400)
@@ -214,7 +214,7 @@ describe('/api', () => {
              expect(err.body.msg).to.equal('Invalid input type')
          })
      })
-     it('ERROR - PATCH 400 when article_id not in the database', () => {
+     it('ERROR - PATCH 404 when article_id not in the database', () => {
          return request(server)
          .patch('/api/article/9999')
          .send({inc_votes : 1})
@@ -277,19 +277,19 @@ describe('/api', () => {
             .then(comment=> {
                     expect(comment.body.comment.body).to.equal('this is my body')
                 })
-             })
-             it('Post: 201 ', () => {
-                return request(server)
-                .post('/api/article/1/comments')
-                .send({
-                    username: 'butter_bridge',
-                    body: 'this is my body' }
-                    )
-                .expect(201)
-                .then(comment=> {
-                        expect(comment.body.comment).to.have.keys('comment_id', 'votes', 'created_at', 'author', 'article_id', 'body')
-                    })
-                 })
+        })
+        it('Post: 201 ', () => {
+             return request(server)
+            .post('/api/article/1/comments')
+            .send({
+                username: 'butter_bridge',
+                body: 'this is my body' }
+                )
+            .expect(201)
+            .then(comment=> {
+                expect(comment.body.comment).to.have.keys('comment_id', 'votes', 'created_at', 'author', 'article_id', 'body')
+            })
+        })
         it('ERROR - POST: 400 when passed input with extra column values than there are in the database', () => {
             return request(server)
             .post('/api/article/1/comments')
@@ -403,8 +403,8 @@ describe('/api', () => {
     });
   })  
   describe('/api/comment', () => {
-    it('"/" DELETE,PATCH,PUT: 504', () => {
-        const badMethods = ['put', 'get'];
+    it('"/" DELETE,POST,PUT: 504', () => {
+        const badMethods = ['put', 'post', 'get'];
         const methodPromises = badMethods.map(method => {
             return request(server)
                 [method]('/api/comment/:comment_id')
@@ -423,8 +423,8 @@ describe('/api', () => {
         .then(comment => {
             expect(comment.body.comment.votes).to.equal(101)
             })
-         })
-         it('PATCH: 200 updates the vote column by a negative increment', () => {
+    })
+    it('PATCH: 200 updates the vote column by a negative increment', () => {
             return request(server)
             .patch('/api/comment/3')
             .send({inc_votes : -1})
@@ -432,7 +432,7 @@ describe('/api', () => {
             .then(comment => {
                 expect(comment.body.comment.votes).to.equal(99)
                 })
-             })
+    })
     it('ERROR - PATCH: 400 when passed invalid id', () => {
          return request(server)
          .patch('/api/comment/silly')
@@ -469,6 +469,27 @@ describe('/api', () => {
             expect(err.body.msg).to.equal('Invalid input type')
         })
     })
+    it('DELETE: 204 deletes the comment with the specified comment_id and sends no body', () => {
+        return request(server)
+        .delete('/api/comment/3')
+        .expect(204)
+         })
+    it('ERROR - DELETE: 404 responds with an error message when given a valid but non-existent comment_id', () => {
+        return request(server)
+        .delete('/api/comment/393939393')
+        .expect(404)
+        .then(err => {
+            expect(err.body.msg).to.equal('comment_id not found')
+        })
+    }) 
+    it('ERROR - DELETE: 400 responds with an error message when given a valid but non-existent comment_id', () => {
+        return request(server)
+        .delete('/api/comment/aaaarrrrrrgggghhhhh')
+        .expect(400)
+        .then(err => {
+            expect(err.body.msg).to.equal('Invalid input type')
+        })
+    })   
   });    
 })
 
