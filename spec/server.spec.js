@@ -167,7 +167,7 @@ describe('/api', () => {
 					expect(articles.body.msg).to.equal('Column does not exist');
 				});
 		});
-		it.only('ERROR - GET: 200 returns a empty array when valid query finds no results', () => {
+		it('GET: 200 returns a empty array when valid query finds no results', () => {
 			return request(server)
 				.get('/api/articles?topic=whatareyouthinking')
 				.expect(200)
