@@ -12,6 +12,12 @@ const connection = require('../db/client');
 describe('/api', () => {
     beforeEach(() => connection.seed.run());
     after(() => connection.destroy());
+    // it('GET:200 returns a list of the available endpoints on the API', () => {
+    //     return request(server)
+    //     .get('/api')
+    //     .expect(200)
+    //     .then()
+    // })
     describe('/sdsd', () => {
 		it('GET:404', () => {
 			return request(server)
@@ -22,18 +28,18 @@ describe('/api', () => {
     describe('/api/topic', () => {
         it('GET 200: returns all topics', () => {
             return request(server)
-            .get('/api/topic')
+            .get('/api/topics')
             .expect(200)
             .then(topics => {
                 expect(topics.body).to.have.keys('topics');
                 expect(topics.body.topics[0]).to.have.keys('description', 'slug');
             })
          })
-         it('"/" DELETE,PATCH,PUT: 504', () => {
+         it('"/" DELETE,PATCH,PUT: 405', () => {
             const badMethods = ['delete', 'put', 'patch'];
             const methodPromises = badMethods.map(method => {
                 return request(server)
-                    [method]('/api/topic')
+                    [method]('/api/topics')
                     .expect(405)
                     .then(({ body: msg }) => {
                         expect(msg.msg).to.equal('Method not allowed');
@@ -56,7 +62,7 @@ describe('/api', () => {
                 })
             })
         })
-        it('"/" DELETE,PATCH,PUT: 504', () => {
+        it('"/" DELETE,PATCH,PUT: 405', () => {
             const badMethods = ['delete', 'put', 'patch'];
             const methodPromises = badMethods.map(method => {
                 return request(server)
@@ -81,7 +87,7 @@ describe('/api', () => {
     describe('/api/article', () => {
         it('GET:200: returns an array of comments when given their article_id', () => {
             return request(server)
-            .get('/api/article')
+            .get('/api/articles')
             .expect(200)
             .then(article => {
                 expect(article.body.articles[0]).to.have.keys(
@@ -97,7 +103,7 @@ describe('/api', () => {
         })
         it('GET:200: returns an array of objects sorted in descending order', () => {
             return request(server)
-            .get('/api/article?sort_by=created_at')
+            .get('/api/articles?sort_by=created_at')
             .expect(200)
             .then(article => {
                 expect(article.body.articles).to.be.descendingBy('created_at')
@@ -105,7 +111,7 @@ describe('/api', () => {
         })
         it('GET: 200 it should sort by various queries', () => {
 			return request(server)
-				.get('/api/article?sort_by=title&order=asc')
+				.get('/api/articles?sort_by=title&order=asc')
 				.expect(200)
 				.then(article => {
 					expect(article.body.articles).to.be.ascendingBy('title');
@@ -113,7 +119,7 @@ describe('/api', () => {
 		});
         it('GET: 200 returns articles when specific search passed in url query', () => {
 			return request(server)
-				.get('/api/article?author=icellusedkars')
+				.get('/api/articles?author=icellusedkars')
 				.expect(200)
 				.then(articleArr => {
 					articleArr.body.articles.forEach(article => {
@@ -123,7 +129,7 @@ describe('/api', () => {
         });
         it('ERROR - GET: 400  return message when column does not exist in DB ', () => {
 			return request(server)
-				.get('/api/article?yabadabadooo=icellusedkars')
+				.get('/api/articles?yabadabadooo=icellusedkars')
 				.expect(400)
 				.then(treasures => {
 					expect(treasures.body.msg).to.equal('Column does not exist');
@@ -131,7 +137,7 @@ describe('/api', () => {
 		});
 		it('ERROR - GET: 404 returns error and message when valid query finds no results', () => {
 			return request(server)
-				.get('/api/article?topic=whatareyouthinking')
+				.get('/api/articles?topic=whatareyouthinking')
 				.expect(404)
 				.then(err => {
 					expect(err.body.msg).to.equal('No articles found');
@@ -139,7 +145,7 @@ describe('/api', () => {
         });
         it('ERROR - GET: 400 when query is invalid', () => {
 			return request(server)
-				.get('/api/article?sort_by=doooo')
+				.get('/api/articles?sort_by=doooo')
 				.expect(400) //< changed from 404
 				.then(err => {
 					expect(err.body.msg).to.equal('Invalid query');
@@ -147,7 +153,7 @@ describe('/api', () => {
 		});
 		it('ERROR - GET: 400 when order is invalid', () => {
 			return request(server)
-				.get('/api/article?sort_by=topic&order=yourdoingthiswrong')
+				.get('/api/articles?sort_by=topic&order=yourdoingthiswrong')
 				.expect(400) 
 				.then(err => {
 					expect(err.body.msg).to.equal('Invalid order value');
@@ -158,7 +164,7 @@ describe('/api', () => {
     describe('/api/article/:article_id', () => {
         it('GET:200: returns article when given their article_id', () => {
             return request(server)
-            .get('/api/article/1')
+            .get('/api/articles/1')
             .expect(200)
             .then(article => {
                 expect(article.body.article).to.have.keys(
@@ -174,7 +180,7 @@ describe('/api', () => {
         })
         it('ERROR - GET:404 return message when article id not in database', () => {
             return request(server)
-            .get('/api/article/999')
+            .get('/api/articles/999')
             .expect(404)
             .then(error => 
             expect(error.body.msg).to.equal('article not found'));
@@ -182,14 +188,14 @@ describe('/api', () => {
     
         it('ERROR - GET:400 return message when article id not valid', () => {
             return request(server)
-            .get('/api/article/sausages')
+            .get('/api/articles/sausages')
             .expect(400)
             .then(error => 
             expect(error.body.msg).to.equal('Invalid input type'));
         })
         it('PATCH: 200 updates the vote column by the increment specified', () => {
     return request(server)
-    .patch('/api/article/1')
+    .patch('/api/articles/1')
     .send({inc_votes : 1})
     .expect(200)
     .then(article => {
@@ -198,7 +204,7 @@ describe('/api', () => {
      })
      it('PATCH: 200 updates the vote column by a negative increment', () => {
         return request(server)
-        .patch('/api/article/1')
+        .patch('/api/articles/1')
         .send({inc_votes : -1})
         .expect(200)
         .then(article => {
@@ -207,7 +213,7 @@ describe('/api', () => {
          })
      it('ERROR - PATCH: 400 when passed invalid id', () => {
          return request(server)
-         .patch('/api/article/silly')
+         .patch('/api/articles/silly')
          .send({inc_votes : 1})
          .expect(400)
          .then(err => {
@@ -216,7 +222,7 @@ describe('/api', () => {
      })
      it('ERROR - PATCH 404 when article_id not in the database', () => {
          return request(server)
-         .patch('/api/article/9999')
+         .patch('/api/articles/9999')
          .send({inc_votes : 1})
          .expect(404)
          .then(err => {
@@ -225,7 +231,7 @@ describe('/api', () => {
      })
      it('ERROR - PATCH: 400 when passed an empty object', () => {
          return request(server)
-         .patch('/api/article/1')
+         .patch('/api/articles/1')
          .send({})
          .expect(400)
          .then(err => {
@@ -234,18 +240,18 @@ describe('/api', () => {
      })
      it('ERROR - PATCH: 400 when passed an object with an incorrect input value type', () => {
         return request(server)
-        .patch('/api/article/1')
+        .patch('/api/articles/1')
         .send({inc_votes: 'peanuts' })
         .expect(400)
         .then(err => {
             expect(err.body.msg).to.equal('Invalid input type')
         })
     })
-    it('"/" DELETE,PATCH,PUT: 504', () => {
+    it('"/" DELETE,PATCH,PUT: 405', () => {
         const badMethods = ['delete', 'put'];
         const methodPromises = badMethods.map(method => {
             return request(server)
-                [method]('/api/article/:article_id')
+                [method]('/api/articles/:article_id')
                 .expect(405)
                 .then(({ body: msg }) => {
                     expect(msg.msg).to.equal('Method not allowed');
@@ -253,12 +259,12 @@ describe('/api', () => {
         });
         return Promise.all(methodPromises);
     });
-    describe('/api/article/:article_id/comments', () => {
-        it('"/" DELETE,PATCH,PUT: 504', () => {
+    describe('/api/articles/:article_id/comments', () => {
+        it('"/" DELETE,PATCH,PUT: 405', () => {
             const badMethods = ['delete', 'put'];
             const methodPromises = badMethods.map(method => {
                 return request(server)
-                    [method]('/api/article/:article_id/comments')
+                    [method]('/api/articles/:article_id/comments')
                     .expect(405)
                     .then(({ body: msg }) => {
                         expect(msg.msg).to.equal('Method not allowed');
@@ -268,7 +274,7 @@ describe('/api', () => {
         });
         it('Post: 201 ', () => {
             return request(server)
-            .post('/api/article/1/comments')
+            .post('/api/articles/1/comments')
             .send({
                 username: 'butter_bridge',
                 body: 'this is my body' }
@@ -280,7 +286,7 @@ describe('/api', () => {
         })
         it('Post: 201 ', () => {
              return request(server)
-            .post('/api/article/1/comments')
+            .post('/api/articles/1/comments')
             .send({
                 username: 'butter_bridge',
                 body: 'this is my body' }
@@ -292,7 +298,7 @@ describe('/api', () => {
         })
         it('ERROR - POST: 400 when passed input with extra column values than there are in the database', () => {
             return request(server)
-            .post('/api/article/1/comments')
+            .post('/api/articles/1/comments')
             .send({
                 username: 'butter_bridge',
                 body: 'this is my body',
@@ -305,7 +311,7 @@ describe('/api', () => {
         })
         it('ERROR - POST: 400 when post called with empty object', () => {
             return request(server)
-            .post('/api/article/1/comments')
+            .post('/api/articles/1/comments')
             .send({})
             .expect(400)
             .then(err => {
@@ -314,7 +320,7 @@ describe('/api', () => {
         })
         it('ERROR - POST: 400 when wrong value type passed into database', () => {
             return request(server)
-            .post('/api/article/1/comments')
+            .post('/api/articles/1/comments')
             .send({username: 'yabadabadooo',
             body: 'ssdkdf'})
             .expect(400)
@@ -324,7 +330,7 @@ describe('/api', () => {
         })
         it('GET:200: returns an array of comments when given their article_id', () => {
             return request(server)
-            .get('/api/article/1/comments')
+            .get('/api/articles/1/comments')
             .expect(200)
             .then(comment => {
                 expect(comment.body.comments[0]).to.have.keys(
@@ -337,7 +343,7 @@ describe('/api', () => {
         })
         it('GET:200 sends an empty array of articles when there are no comments in the house', () => {
             return request(server)
-              .get('/api/article/2/comments')
+              .get('/api/articles/2/comments')
               .expect(200)
               .then(comment => {
                 expect(comment.body.comments).to.eql([]);
@@ -345,7 +351,7 @@ describe('/api', () => {
           });
         it('GET:200: returns an array sorted by a query when given their article_id', () => {
             return request(server)
-            .get('/api/article/1/comments?sort_by=created_at')
+            .get('/api/articles/1/comments?sort_by=created_at')
             .expect(200)
             .then(comment => {
                 expect(comment.body.comments).to.be.descendingBy('created_at')
@@ -353,7 +359,7 @@ describe('/api', () => {
         })
         it('GET:200: returns an array sorted by a different query when given their article_id', () => {
             return request(server)
-            .get('/api/article/1/comments?sort_by=article_id')
+            .get('/api/articles/1/comments?sort_by=article_id')
             .expect(200)
             .then(comment => {
                 expect(comment.body.comments).to.be.descendingBy('created_at')
@@ -361,7 +367,7 @@ describe('/api', () => {
         })
         it('GET:200: returns an array sorted in ascending order by a query when given their article_id', () => {
             return request(server)
-            .get('/api/article/1/comments?sort_by=created_at&order=asc')
+            .get('/api/articles/1/comments?sort_by=created_at&order=asc')
             .expect(200)
             .then(comment => {
                 expect(comment.body.comments).to.be.ascendingBy('created_at')
@@ -369,7 +375,7 @@ describe('/api', () => {
         })
         it('ERROR - GET 400 when a valid article_id not in the database', () => {
             return request(server)
-            .get('/api/article/999/comments?sort_by=created_at')
+            .get('/api/articles/999/comments?sort_by=created_at')
             .expect(404)
             .then(err => {
                 expect(err.body.msg).to.equal('article_id does not exist')
@@ -377,7 +383,7 @@ describe('/api', () => {
         })
         it('ERROR - GET 400 when an invalid article_id is used', () => {
             return request(server)
-            .get('/api/article/biscuits/comments?sort_by=created_at')
+            .get('/api/articles/biscuits/comments?sort_by=created_at')
             .expect(400)
             .then(err => {
                 expect(err.body.msg).to.equal('Invalid input type')
@@ -385,7 +391,7 @@ describe('/api', () => {
         })
         it('ERROR - GET 400 when query is invalid', () => {
             return request(server)
-            .get('/api/article/1/comments?sort_by=cheese')
+            .get('/api/articles/1/comments?sort_by=cheese')
             .expect(400)
             .then(err => {
                 expect(err.body.msg).to.equal('Invalid query')
@@ -393,7 +399,7 @@ describe('/api', () => {
         })
         it('ERROR - GET 400 when order is invalid', () => {
             return request(server)
-            .get('/api/article/1/comments?sort_by=created_at&order=this_is_not_correct')
+            .get('/api/articles/1/comments?sort_by=created_at&order=this_is_not_correct')
             .expect(400)
             .then(err => {
                 expect(err.body.msg).to.equal('Invalid order value')
@@ -403,11 +409,11 @@ describe('/api', () => {
     });
   })  
   describe('/api/comment', () => {
-    it('"/" DELETE,POST,PUT: 504', () => {
+    it('"/" DELETE,POST,PUT: 405', () => {
         const badMethods = ['put', 'post', 'get'];
         const methodPromises = badMethods.map(method => {
             return request(server)
-                [method]('/api/comment/:comment_id')
+                [method]('/api/comments/:comment_id')
                 .expect(405)
                 .then(({ body: msg }) => {
                     expect(msg.msg).to.equal('Method not allowed');
@@ -417,7 +423,7 @@ describe('/api', () => {
     });
     it('PATCH: 200 updates the vote column by the increment specified', () => {
         return request(server)
-        .patch('/api/comment/3')
+        .patch('/api/comments/3')
         .send({inc_votes : 1})
         .expect(200)
         .then(comment => {
@@ -426,7 +432,7 @@ describe('/api', () => {
     })
     it('PATCH: 200 updates the vote column by a negative increment', () => {
             return request(server)
-            .patch('/api/comment/3')
+            .patch('/api/comments/3')
             .send({inc_votes : -1})
             .expect(200)
             .then(comment => {
@@ -435,7 +441,7 @@ describe('/api', () => {
     })
     it('ERROR - PATCH: 400 when passed invalid id', () => {
          return request(server)
-         .patch('/api/comment/silly')
+         .patch('/api/comments/silly')
          .send({inc_votes : 1})
          .expect(400)
          .then(err => {
@@ -444,7 +450,7 @@ describe('/api', () => {
      })
      it('ERROR - PATCH 400 when article_id not in the database', () => {
          return request(server)
-         .patch('/api/comment/9999')
+         .patch('/api/comments/9999')
          .send({inc_votes : 1})
          .expect(404)
          .then(err => {
@@ -453,7 +459,7 @@ describe('/api', () => {
      })
      it('ERROR - PATCH: 400 when passed an empty object', () => {
          return request(server)
-         .patch('/api/comment/1')
+         .patch('/api/comments/1')
          .send({})
          .expect(400)
          .then(err => {
@@ -462,7 +468,7 @@ describe('/api', () => {
      })
      it('ERROR - PATCH: 400 when passed an object with an incorrect input value type', () => {
         return request(server)
-        .patch('/api/comment/1')
+        .patch('/api/comments/1')
         .send({inc_votes: 'peanuts' })
         .expect(400)
         .then(err => {
@@ -471,12 +477,12 @@ describe('/api', () => {
     })
     it('DELETE: 204 deletes the comment with the specified comment_id and sends no body', () => {
         return request(server)
-        .delete('/api/comment/3')
+        .delete('/api/comments/3')
         .expect(204)
          })
     it('ERROR - DELETE: 404 responds with an error message when given a valid but non-existent comment_id', () => {
         return request(server)
-        .delete('/api/comment/393939393')
+        .delete('/api/comments/393939393')
         .expect(404)
         .then(err => {
             expect(err.body.msg).to.equal('comment_id not found')
@@ -484,7 +490,7 @@ describe('/api', () => {
     }) 
     it('ERROR - DELETE: 400 responds with an error message when given a valid but non-existent comment_id', () => {
         return request(server)
-        .delete('/api/comment/aaaarrrrrrgggghhhhh')
+        .delete('/api/comments/aaaarrrrrrgggghhhhh')
         .expect(400)
         .then(err => {
             expect(err.body.msg).to.equal('Invalid input type')
