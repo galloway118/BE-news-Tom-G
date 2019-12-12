@@ -11,6 +11,7 @@ server.all('/*', (req, res, next) => {
 });
 
 server.use((err, req, res, next) => {
+    //console.log(err);
     if(err.status){
         next(err);
     } else {

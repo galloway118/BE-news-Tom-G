@@ -24,5 +24,83 @@
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves an article object with a count of all the comments with the corresponding article_id",
+    "queries": "article_id",
+    "exampleResponses": {
+      "article": 
+        {
+          "title": "Seafood substitutions are increasing",
+          "topic": "cooking",
+          "author": "weegembump",
+          "body": "Text from the article..",
+          "created_at": 1527695953341,
+          "comment_count": 32,
+          "article_id": 1,
+          "votes": 3
+        }
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "serves an article object with the votes incremented from the request body",
+    "queries": ["article_id", {"inc_votes": 2}],
+    "exampleResponses": {"article": {
+      "title": "Seafood substitutions are increasing",
+      "topic": "cooking",
+      "author": "weegembump",
+      "body": "Text from the article..",
+      "created_at": 1527695953341
+    }}
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "adds a comment to the database with a specific article_id",
+    "queries": ["article_id", {"username": "username", "body": "body"}],
+    "exampleResponses": {"comment": {
+      "comment_id": 1,
+      "author": "weegembump",
+      "body": "Text from the article..",
+      "created_at": 1527695953341,
+      "article_id": 1
+      }
+    }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves an array of comments for a specific article_id",
+    "queries": ["article_id", "sort_by", "order"],
+    "exampleResponses": {"comments": [{
+      "comment_id": 1,
+      "author": "weegembump",
+      "body": "Text from the article..",
+      "created_at": 1527695953341,
+      "votes": 1
+      }]
+    }
+  },
+  "GET /api/users/:username": {
+    "description": "serves a user object with the corresponding username",
+    "queries": "username",
+    "exampleResponses": { "user": {
+        "username": "weegem",
+        "avatar_url": "http://thisismyurl",
+        "name": "jimbob"
+    }}
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "serves the updated comment with the corresponding comment_id",
+    "queries": ["comment_id", {"inc_votes": 2}],
+    "exampleResponses": {"comments": {
+      "comment_id": 1,
+      "author": "weegembump",
+      "body": "Text from the article..",
+      "created_at": 1527695953341,
+      "votes": 3
+        }
+      }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes a comment with the corresponding comment_id",
+    "queries": "comment_id",
+    "exampleResponses": "no response sent, status 204"
   }
 }

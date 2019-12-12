@@ -1,5 +1,4 @@
 exports.formatDates = list => {
-//console.log(list);
     return list.map( singleObj => {
         const newObj = {...singleObj};
         const newDate = new Date(newObj.created_at);

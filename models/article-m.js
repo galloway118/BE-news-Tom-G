@@ -1,4 +1,7 @@
 const connection = require('../db/client');
+// const {fetchTopics} = require('../models/topic-m');
+// const {fetchUserbyUsername} = require('../models/users-m');
+
 
 const fetchArticleById = (article_id) => {
 
@@ -21,14 +24,7 @@ const fetchArticleById = (article_id) => {
         })
 }
 
-const updateArticleById = (inc_votes, article_id) => {
-    if(inc_votes === undefined){
-        return Promise.reject({
-            status:400,
-             msg: 'Post violates non null constraints'
-        })
-    } else {
-
+const updateArticleById = (inc_votes = 0, article_id) => {
     return  connection('article')
     .where('article_id', '=', article_id)
     .increment('votes', inc_votes)
@@ -43,7 +39,7 @@ const updateArticleById = (inc_votes, article_id) => {
         return {article: article[0]}
         }
     })
-  }
+
 }
 
 const insertComment = (body, username, article_id, invalid) => {
@@ -54,7 +50,7 @@ const insertComment = (body, username, article_id, invalid) => {
         })
     }
     if (Object.keys(invalid).length != 0) {
-		return Promise.reject({ status: 400, msg: 'Column does not exist' });
+		return Promise.reject({ status: 404, msg: 'Column/id does not exist' });
 	} else {
 return connection
 .into('comment')
@@ -110,7 +106,7 @@ invalidColumn) => {
 		return Promise.reject({ status: 400, msg: 'Column does not exist' });
 	} else {
 
-    return connection.select(
+    const articleArr = connection.select(
      'article.author',
      'article.title', 
      'article.article_id',
@@ -128,19 +124,46 @@ invalidColumn) => {
     .modify(query => {
         if(topic) return query.where('topic', '=', topic)
     })
-    .then(articles => {
-        if (!articles.length) {
+  
+//    const authors = fetchAuthors(author);
+//    const topics = fetchTopics(topic);
+const fetchTopics = (topic) => {
+    return connection('topic')
+    .select('*')
+    .where('slug', '=', topic)
+    .then(topics => {
+        return topics
+      })
+    }
+const fetchAuthors = (author) => {
+    return connection('users')
+.select('*')
+.where('username', '=', author)
+.then(authors => {
+    return authors
+})
+} 
+
+    return Promise.all([ fetchAuthors, fetchTopics, articleArr])
+    .then(([authors, topics, articleArr]) => {
+        if (!topics ) {
+            return Promise.reject({ status: 404, msg: 'No articles found' });
+        }
+        else if(!authors && topics){
             return Promise.reject({ status: 404, msg: 'No articles found' });
         }
         else {
-        return {articles: articles}
+            console.log({articles:articleArr})
+            return {articles: articleArr}
         }
     })
     }
 }
 
-        
 
+ 
+
+ 
 
 
 

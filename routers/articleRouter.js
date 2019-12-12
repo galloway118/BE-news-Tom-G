@@ -5,7 +5,7 @@ const {getArticles, getArticleById, patchArticleById, postComment, getCommentsBy
 const {badRequest} = require('../controllers/error-c');
 
 articleRouter.route('/')
-.get(getArticles)
+.get(getArticles).all(badRequest);
 
 articleRouter.route('/:article_id')
 .get(getArticleById)

@@ -1,12 +1,6 @@
 const connection = require('../db/client');
 
-const updateCommentsById = (inc_votes, comment_id) => {
-    if(inc_votes === undefined){
-        return Promise.reject({
-            status:400,
-             msg: 'Post violates non null constraints'
-        })
-    } else {
+const updateCommentsById = (inc_votes = 0, comment_id) => {
     return  connection('comment')
     .where('comment_id', '=', comment_id)
     .increment('votes', inc_votes)
@@ -21,7 +15,6 @@ const updateCommentsById = (inc_votes, comment_id) => {
         return {comment: comment[0]}
         }
     })
-  }
 }
 
 const removeCommentById = (comment_id) => {
@@ -29,7 +22,7 @@ const removeCommentById = (comment_id) => {
     .where('comment_id', '=', comment_id)
     .del()
     .then(comment => {
-        console.log(comment)
+        //console.log(comment)
         if(!comment){
            return Promise.reject({
                status: 404,
