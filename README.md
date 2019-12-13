@@ -62,14 +62,15 @@ In order for the API to run you need to install the following dependencies
 
  run npm install (*)
 
-* (*)"knex": "^0.20.4"
+* (*)"knex": "^0.20.4",
+* (*)"pg": "^7.14.0",
+* (*)"express": "^4.17.1"
 
 You will also need to install the following dev dependencies 
 
   run npm install (*) -D
 
-* (*)"pg": "^7.14.0",
-* (*)"express": "^4.17.1",
+
 * (*)"chai": "^4.2.0",
 * (*)"mocha": "^6.2.2",
 * (*)"chai-sorted": "^0.2.0",
