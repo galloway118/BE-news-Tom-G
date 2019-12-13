@@ -1,6 +1,7 @@
 const express = require('express');
 const {apiRouter} = require('./routers/apiRouter');
 const server = express();
+const {handlePsqlErrors, handleCustomErrors} = require('./controllers/error-c');
 
 server.use(express.json());
 
@@ -10,29 +11,8 @@ server.all('/*', (req, res, next) => {
     res.status(404).send({msg: 'Endpoint does not exist'});
 });
 
-server.use((err, req, res, next) => {
-    if(err.status){
-        next(err);
-    } else {
-            const psqlErr = { 
-                '22P02': [400, 'Invalid input type'],
-                '23503': [404, 'request not valid'],
-                '42703': [400, 'Invalid query']   
-            };
-            if (Object.keys(psqlErr).includes(err.code)) {
-                res.status(psqlErr[err.code][0]).send({ msg: psqlErr[err.code][1] });
-            } else {
-    
-                res.status(500).send({ msg: err.code });
-            }
-    }
-});
+server.use(handlePsqlErrors);
 
-server.use((err, req, res, next) => {
-    if(err.status){
-        res.status(err.status).send({msg: err.msg})
-    } else {
-        next(err);
-    }
-})
+server.use(handleCustomErrors);
+
 module.exports = {server};
