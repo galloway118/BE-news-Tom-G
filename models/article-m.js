@@ -125,8 +125,7 @@ invalidColumn) => {
         if(topic) return query.where('topic', '=', topic)
     })
   
-//    const authors = fetchAuthors(author);
-//    const topics = fetchTopics(topic);
+
 const fetchTopics = (topic) => {
     return connection('topic')
     .select('*')
@@ -153,7 +152,6 @@ const fetchAuthors = (author) => {
             return Promise.reject({ status: 404, msg: 'No articles found' });
         }
         else {
-            console.log({articles:articleArr})
             return {articles: articleArr}
         }
     })
