@@ -16,7 +16,7 @@ server.use((err, req, res, next) => {
     } else {
             const psqlErr = { 
                 '22P02': [400, 'Invalid input type'],
-                '23503': [400, 'request not valid'],
+                '23503': [404, 'request not valid'],
                 '42703': [400, 'Invalid query']   
             };
             if (Object.keys(psqlErr).includes(err.code)) {

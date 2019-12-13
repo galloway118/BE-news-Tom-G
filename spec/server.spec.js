@@ -25,6 +25,18 @@ describe('/api', () => {
 				.expect(404);
 		});
     });
+    it('"/" DELETE,PATCH,PUT: 405', () => {
+        const badMethods = ['delete', 'patch'];
+        const methodPromises = badMethods.map(method => {
+            return request(server)
+                [method]('/api')
+                .expect(405)
+                .then(({ body: msg }) => {
+                    expect(msg.msg).to.equal('Method not allowed');
+                });
+        });
+        return Promise.all(methodPromises);
+    });    
     describe('/api/topic', () => {
         it('GET 200: returns all topics', () => {
             return request(server)
@@ -167,12 +179,12 @@ describe('/api', () => {
 					expect(articles.body.msg).to.equal('Column does not exist');
 				});
 		});
-		it('GET: 200 returns a empty array when valid query finds no results', () => {
+		it('ERROR -GET: 404 returns a empty array when valid query finds no results', () => {
 			return request(server)
 				.get('/api/articles?topic=whatareyouthinking')
-				.expect(200)
-				.then(articles => {
-					expect(articles.body.articles).to.eql([]);
+				.expect(404)
+				.then(err => {
+					expect(err.body.msg).to.eql('No articles found');
 				});
         });
         it('ERROR - GET: 400 when query is invalid', () => {
@@ -361,16 +373,32 @@ describe('/api', () => {
                 expect(err.body.msg).to.equal('Post violates non null constraints') 
             })
         })
-        it('ERROR - POST: 400 when wrong value type passed into database', () => {
+        it('ERROR - POST: 404 when wrong value type passed into database', () => {
             return request(server)
             .post('/api/articles/1/comments')
             .send({username: 'yabadabadooo',
             body: 'ssdkdf'})
-            .expect(400)
+            .expect(404)
             .then(err => {
                 expect(err.body.msg).to.equal('request not valid') 
             })
         })
+        it('ERROR - POST: 404 when wrong value type passed into database', () => {
+            return request(server)
+            .post('/api/articles/99999/comments')
+            .send({
+                username: 'butter_bridge',
+                body: 'this is my body'
+             })
+            .expect(404)
+            .then(err => {
+                expect(err.body.msg).to.equal('request not valid') 
+            })
+        })
+
+
+
+
         it('GET:200: returns an array of comments when given their article_id', () => {
             return request(server)
             .get('/api/articles/1/comments')

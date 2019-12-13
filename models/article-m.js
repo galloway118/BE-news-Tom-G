@@ -1,6 +1,6 @@
 const connection = require('../db/client');
 // const {fetchTopics} = require('../models/topic-m');
-// const {fetchUserbyUsername} = require('../models/users-m');
+ //const {fetchUserbyUsername} = require('../models/users-m');
 
 
 const fetchArticleById = (article_id) => {
@@ -57,7 +57,7 @@ return connection
 .insert({'article_id': article_id, 'body': body,  'author': username})
 .returning('*')
 .then(comment => {
-    return {comment: comment[0]};  
+    return {comment: comment[0]}; 
 })
 }
 }
@@ -94,10 +94,7 @@ const fetchCommentsByArticleId = (article_id, sort_by = 'created_at', order = 'd
 }
 
 const fetchArticles = (sort_by = 'created_at', 
-order = 'desc', 
-author, 
-topic,
-invalidColumn) => {
+order = 'desc', author, topic, invalidColumn) => {
     const validOrders = ['asc', 'desc'];
     if (!validOrders.includes(order)) {
 		return Promise.reject({ status: 400, msg: 'Invalid order value' });
@@ -107,63 +104,49 @@ invalidColumn) => {
 	} else {
 
     const articleArr = connection.select(
-     'article.author',
-     'article.title', 
-     'article.article_id',
-      'article.topic',
-      'article.created_at',
-      'article.votes')
+     'article.author', 'article.title', 'article.article_id', 'article.topic', 'article.created_at', 'article.votes')
     .from('article')
     .leftJoin('comment', 'comment.article_id', '=', 'article.article_id')
     .count({comment_count: 'comment.article_id'})
     .groupBy('article.article_id')
     .orderBy(sort_by, order)
     .modify(query => {
-        if(author)return query.where('article.author', '=', author)
+      if(author)return query.where('article.author', '=', author)
     })
     .modify(query => {
         if(topic) return query.where('topic', '=', topic)
-    })
+    });
+  
+    const authors = author?  checkQuery('users', 'username', author): null;
+    const topics = topic? checkQuery('topic', 'slug', topic): null;
   
 
-const fetchTopics = (topic) => {
-    return connection('topic')
-    .select('*')
-    .where('slug', '=', topic)
-    .then(topics => {
-        return topics
-      })
-    }
-const fetchAuthors = (author) => {
-    return connection('users')
-.select('*')
-.where('username', '=', author)
-.then(authors => {
-    return authors
-})
-} 
-
-    return Promise.all([ fetchAuthors, fetchTopics, articleArr])
-    .then(([authors, topics, articleArr]) => {
-        if (!topics ) {
+    return Promise.all([ topics, authors, articleArr])
+    .then(([ topics, authors, articleArr]) => {
+        
+         if (topics ) {
             return Promise.reject({ status: 404, msg: 'No articles found' });
         }
-        else if(!authors && topics){
+        else if(authors) {
             return Promise.reject({ status: 404, msg: 'No articles found' });
         }
         else {
             return {articles: articleArr}
         }
-    })
+     })
     }
 }
 
-
+    const checkQuery = (table, columnName, query) => {
+        console.log(table, columnName, query)
+        return connection(table)
+        .select('*')
+        .where(columnName, '=', query)
+        .then(response => {
+            return response.length === 0
+        })
+    }
  
-
- 
-
-
 
 module.exports = {
     fetchArticleById, 

@@ -1,6 +1,7 @@
 const connection = require('../db/client');
 
-const fetchUserbyUsername = (username) => {
+const fetchUserbyUsername = (username = '') => {
+
     return connection('users')
     .select('*')
     .where('username', '=', username)
