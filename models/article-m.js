@@ -1,7 +1,4 @@
 const connection = require('../db/client');
-// const {fetchTopics} = require('../models/topic-m');
- //const {fetchUserbyUsername} = require('../models/users-m');
-
 
 const fetchArticleById = (article_id) => {
 

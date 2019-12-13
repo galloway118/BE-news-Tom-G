@@ -156,7 +156,6 @@ describe('/api', () => {
               .get('/api/articles?author=lurker')
               .expect(200)
               .then(comment => {
-                  //console.log(comment)
                 expect(comment.body.articles).to.eql([]);
               });
           });
@@ -190,7 +189,7 @@ describe('/api', () => {
         it('ERROR - GET: 400 when query is invalid', () => {
 			return request(server)
 				.get('/api/articles?sort_by=doooo')
-				.expect(400) //< changed from 404
+				.expect(400) 
 				.then(err => {
 					expect(err.body.msg).to.equal('Invalid query');
 				});

@@ -14,17 +14,15 @@ const customConfig = {
   development: {
     connection: {
       database: 'nc_news'
-      // user,
-      // password
+      
     }
   },
   test: {
     connection: {
       database: 'nc_news_test'
-      // user,
-      // password
+      
     }
   }
 };
-//console.log({ ...customConfig[ENV], ...baseConfig})
+
 module.exports = { ...customConfig[ENV], ...baseConfig };
