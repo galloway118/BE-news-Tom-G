@@ -125,7 +125,7 @@ In order to run the tests you should run
 
 The hosted version can be accessed at the following link 
 
-https://git.heroku.com/tom-news-app.git
+https://tom-news-app.herokuapp.com/
 
 ## Authors 
 
