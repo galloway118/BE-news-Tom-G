@@ -1,12 +1,21 @@
 const userRouter = require('express').Router();
 
-const {getUserByUsername} = require('../controllers/users-c');
+const {
+  getUserByUsername,
+  getUsers,
+  postUser
+} = require('../controllers/users-c');
 
-const {badRequest} = require('../controllers/error-c');
+const { badRequest } = require('../controllers/error-c');
 
 userRouter
-.route('/:username')
-.get(getUserByUsername)
-.all(badRequest);
+  .route('/')
+  .get(getUsers)
+  .all(badRequest);
 
-module.exports = {userRouter};
+userRouter
+  .route('/:username')
+  .get(getUserByUsername)
+  .all(badRequest);
+
+module.exports = { userRouter };
